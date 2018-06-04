@@ -17,6 +17,8 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QMenuBar
+from PyQt5.QtWidgets import QLineEdit
+from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import QCoreApplication
 
 class Window(QMainWindow):
@@ -29,23 +31,10 @@ class Window(QMainWindow):
         self.width = 680
         self.height = 540
         self.setWindowIcon(QtGui.QIcon("M.png"))
-        
-        bBrowse = QPushButton("Browse", self)
-        bBrowse.move(570, 35)
-        
-        bRun = QPushButton("Run", self)
-        bRun.move(570, 480)
-        bRun.setToolTip("Run application")
-        
-        bBrowse.setToolTip("Browse")
-        #bRun.clicked.connect(self.)
-        
+
         self.InitWindow()
     
     def InitWindow(self):
-        
-        self.statusbar = self.statusBar()
-        self.statusbar.showMessage("Status bar...")
         
         mainMenu = self.menuBar()
         fileMenu = mainMenu.addMenu("File")
@@ -93,7 +82,7 @@ class Window(QMainWindow):
         
         citationAction = QAction("Citation", self)
         citationAction.setStatusTip("Cite this software")
-        #citationAction.triggered.connect(editMenu.paste)
+        citationAction.triggered.connect(self.Citation)
         
         fileMenu.addAction(newAction)
         fileMenu.addAction(saveAction)
@@ -104,7 +93,75 @@ class Window(QMainWindow):
         helpMenu.addAction(tutorialAction)
         helpMenu.addAction(aboutAction)
         helpMenu.addAction(citationAction)
+                
+        self.lineedit = QLineEdit("Directory/Occurrence_data.csv", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 50)
         
+        self.lineedit = QLineEdit("Current_variables/", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 120)
+        
+        self.lineedit = QLineEdit("Past_variables/", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 190)
+        
+        self.lineedit = QLineEdit("Select dispersal function", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 260)
+        
+        self.lineedit = QLineEdit("Directory/", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 330)
+        
+        self.label1 = QLabel("Occurrences (.csv)", self)
+        self.label1.move(15, 25)
+        
+        self.label1 = QLabel("Current scenario", self)
+        self.label1.move(15, 95)
+        
+        self.label1 = QLabel("Past scenario", self)
+        self.label1.move(15, 165)
+        
+        self.label1 = QLabel("Dispersal function", self)
+        self.label1.move(15, 235)
+        
+        self.label1 = QLabel("Output directory", self)
+        self.label1.move(15, 305)
+        
+        bBrowse = QPushButton("Browse", self)
+        bBrowse.move(570, 50)
+        bBrowse.setToolTip("Browse")
+        #bBrowse.clicked.connect(self.)
+        
+        bBrowse = QPushButton("Browse", self)
+        bBrowse.move(570, 120)
+        bBrowse.setToolTip("Browse")
+        #bBrowse.clicked.connect(self.)
+        
+        bBrowse = QPushButton("Browse", self)
+        bBrowse.move(570, 190)
+        bBrowse.setToolTip("Browse")
+        #bBrowse.clicked.connect(self.)
+        
+        bBrowse = QPushButton("Select", self)
+        bBrowse.move(570, 260)
+        bBrowse.setToolTip("Select dispersal function")
+        #bBrowse.clicked.connect(self.)
+        
+        bBrowse = QPushButton("Browse", self)
+        bBrowse.move(570, 330)
+        bBrowse.setToolTip("Browse")
+        #bBrowse.clicked.connect(self.)
+        
+        bRun = QPushButton("Run", self)
+        bRun.move(570, 490)
+        bRun.setToolTip("Run application")
+        #bRun.clicked.connect(self.)
+        
+        self.statusbar = self.statusBar()
+        self.statusbar.showMessage("Status bar...")
+
         self.setWindowTitle(self.title)
         self.setGeometry(self.top, self.left, self.width, self.height)
         self.show()
@@ -132,7 +189,13 @@ class Window(QMainWindow):
         
         if action == quitAction:
             self.close()
-        
+    
+    def Citation(self):
+        citation = """Authors. 2018. M simulation: A sofware for constructing hypotheses 
+of M areas for ecological niche modeling. Journal v:p-p."""
+        QMessageBox.information(self, "Citation", citation,
+                             QMessageBox.Ok, QMessageBox.Ok)
+
         
                     
 App = QApplication(sys.argv)
