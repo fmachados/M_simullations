@@ -29,7 +29,7 @@ class Window(QMainWindow):
         self.top = 100
         self.left = 100
         self.width = 680
-        self.height = 540
+        self.height = 680
         self.setWindowIcon(QtGui.QIcon("M.png"))
 
         self.InitWindow()
@@ -94,6 +94,7 @@ class Window(QMainWindow):
         helpMenu.addAction(aboutAction)
         helpMenu.addAction(citationAction)
                 
+        # fields to be used by the user
         self.lineedit = QLineEdit("Directory/Occurrence_data.csv", self)
         self.lineedit.resize(540, 30)
         self.lineedit.move(15, 50)
@@ -102,33 +103,83 @@ class Window(QMainWindow):
         self.lineedit.resize(540, 30)
         self.lineedit.move(15, 120)
         
-        self.lineedit = QLineEdit("Past_variables/", self)
-        self.lineedit.resize(540, 30)
+        self.lineedit = QLineEdit("5", self)
+        self.lineedit.resize(250, 30)
         self.lineedit.move(15, 190)
         
-        self.lineedit = QLineEdit("Select dispersal function", self)
-        self.lineedit.resize(540, 30)
+        self.lineedit = QLineEdit("25", self)
+        self.lineedit.resize(250, 30)
+        self.lineedit.move(305, 190)
+        
+        self.lineedit = QLineEdit("1000", self)
+        self.lineedit.resize(250, 30)
         self.lineedit.move(15, 260)
         
-        self.lineedit = QLineEdit("Directory/", self)
+        self.lineedit = QLineEdit("100", self)
+        self.lineedit.resize(250, 30)
+        self.lineedit.move(305, 260)
+        
+        self.lineedit = QLineEdit("Select dispersal kernel", self)
         self.lineedit.resize(540, 30)
         self.lineedit.move(15, 330)
         
+        self.lineedit = QLineEdit("Past_variables/", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 400)
+        
+        self.lineedit = QLineEdit("500", self)
+        self.lineedit.resize(250, 30)
+        self.lineedit.move(15, 470)
+        
+        self.lineedit = QLineEdit("95", self)
+        self.lineedit.resize(250, 30)
+        self.lineedit.move(305, 470)
+        
+        self.lineedit = QLineEdit("Directory/", self)
+        self.lineedit.resize(540, 30)
+        self.lineedit.move(15, 540)
+        
+        # labels for fields
         self.label1 = QLabel("Occurrences (.csv)", self)
         self.label1.move(15, 25)
         
         self.label1 = QLabel("Current scenario", self)
         self.label1.move(15, 95)
         
-        self.label1 = QLabel("Past scenario", self)
+        self.label1 = QLabel("Threshold (% E)", self)
         self.label1.move(15, 165)
         
-        self.label1 = QLabel("Dispersal function", self)
+        self.label1 = QLabel("% initial records", self)
+        self.label1.move(305, 165)
+        
+        self.label1 = QLabel("Time steps", self)
         self.label1.move(15, 235)
         
-        self.label1 = QLabel("Output directory", self)
+        self.label1 = QLabel("Replicates", self)
+        self.label1.move(305, 235)
+        
+        self.label1 = QLabel("Dispersal kernel", self)
         self.label1.move(15, 305)
         
+        self.label1 = QLabel("Past scenario", self)
+        self.label1.move(15, 375)
+        
+        self.label1 = QLabel("(optional)", self)
+        self.label1.move(83, 375)
+        
+        self.label1 = QLabel("Burn in (if Past", self)
+        self.label1.move(15, 445)
+        
+        self.label1 = QLabel("scenario is set)", self)
+        self.label1.move(90, 445)
+        
+        self.label1 = QLabel("M confidence", self)
+        self.label1.move(305, 445)
+        
+        self.label1 = QLabel("Output directory", self)
+        self.label1.move(15, 515)
+        
+        # buttons for each field
         bBrowse = QPushButton("Browse", self)
         bBrowse.move(570, 50)
         bBrowse.setToolTip("Browse")
@@ -139,23 +190,23 @@ class Window(QMainWindow):
         bBrowse.setToolTip("Browse")
         #bBrowse.clicked.connect(self.)
         
+        bBrowse = QPushButton("Select", self)
+        bBrowse.move(570, 330)
+        bBrowse.setToolTip("Select dispersal kernel")
+        #bBrowse.clicked.connect(self.)
+        
         bBrowse = QPushButton("Browse", self)
-        bBrowse.move(570, 190)
+        bBrowse.move(570, 400)
         bBrowse.setToolTip("Browse")
         #bBrowse.clicked.connect(self.)
         
-        bBrowse = QPushButton("Select", self)
-        bBrowse.move(570, 260)
-        bBrowse.setToolTip("Select dispersal function")
-        #bBrowse.clicked.connect(self.)
-        
         bBrowse = QPushButton("Browse", self)
-        bBrowse.move(570, 330)
+        bBrowse.move(570, 540)
         bBrowse.setToolTip("Browse")
         #bBrowse.clicked.connect(self.)
         
         bRun = QPushButton("Run", self)
-        bRun.move(570, 490)
+        bRun.move(570, 620)
         bRun.setToolTip("Run application")
         #bRun.clicked.connect(self.)
         
