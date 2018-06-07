@@ -1,3 +1,4 @@
+#!usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Sat Apr 28 13:48:05 2018
@@ -7,7 +8,8 @@ Created on Sat Apr 28 13:48:05 2018
 #Define working directory
 import os
 os.getcwd() #current working directory
-os.chdir("C:\\Users\\Fernando Machado\\Desktop\\Taigo\\Academia\\KU\\Courses\\Simulation & Modeling in Bio (Pyhton)\\ip") #new working directory
+#os.chdir("C:\\Users\\Fernando Machado\\Desktop\\Taigo\\Academia\\KU\\Courses\\Simulation & Modeling in Bio (Pyhton)\\ip") #new working directory
+os.chdir("C:\\Users\\Fernando Machado\\Documents\\Python\\M_simullations")
 
 import matplotlib.pyplot as plt
 from random import choice
@@ -17,6 +19,7 @@ import time
 import csv
 from scipy.stats import chi2
 import matplotlib.patches as mpatches
+import linecache
 
 start = time.time() #measuring performance
 
@@ -24,26 +27,37 @@ start = time.time() #measuring performance
 out1 = open("Report.txt","w")
 
 #csv inputs
-with open("clip_bio1_10m.csv", "r") as f: #csv for Temperature data in Northern South America (WorldClim)
-    reader = csv.reader(f)
-    Temp_M = list(reader)
-    
-with open("clip_bio12_10m.csv", "r") as f: #csv for Precipitation data in Northern South America (WorldClim)
-    reader = csv.reader(f)
-    Prec_M = list(reader)
+#with open("clip_bio1_10m.csv", "r") as f: #csv for Temperature data in Northern South America (WorldClim)
+#    reader = csv.reader(f)
+#    Temp_M = list(reader)
+
+#with open("clip_bio12_10m.csv", "r") as f: #csv for Precipitation data in Northern South America (WorldClim)
+#    reader = csv.reader(f)
+#    Prec_M = list(reader)
+
+#Size of matrices (ascii)
+metadata = []
+for i in range(6): #the first six lines of the ascii file
+    metadata.append(linecache.getline("clip_bio1_10m.asc", i+1)) #each line is appended inside the metadata matrix
+    metadata[i] = metadata[i].split() #changes from string to list
+    metadata[i][1] = float(metadata[i][1]) #changes the values to string elements to floats
 
 #size of environmental matrices
-Nrow = len(Temp_M)
-Ncol = len(Temp_M[0])
+Nrow = int(metadata[1][1])
+Ncol = int(metadata[0][1])
 out1.write("Size of grid: " + str(Nrow) + " by " + str(Ncol) + "\n" + "\n")
+
+#The variables
+bio1 = np.loadtxt("clip_bio1_10m.asc", skiprows = 6)
+bio12 = np.loadtxt("clip_bio12_10m.asc", skiprows = 6)
 
 #creates flat lists from the environmental matrices and transform the values to integers
 Temp_data = []
 Prec_data = []
 for row in range(Nrow):
     for col in range(Ncol):
-        Temp_data.append(int(Temp_M[row][col]))
-        Prec_data.append(int(Prec_M[row][col]))
+        Temp_data.append(int(bio1[row][col]))
+        Prec_data.append(int(bio12[row][col]))
 
 #Presence points of Henicorhina leucosticta (HL) in which temperature & precipitation values were extracted in QGIS and saved as a csv
 with open("Nf_Hleucosticta.csv", "r") as f: #has a header
@@ -58,7 +72,7 @@ for row in range(len(HLdata)):
         Prec_list.append(int(HLdata[row][3]))
 
 #Number of replicates
-rep = 10
+rep = 4#10
 out1.write("Replicates: " + str(rep) + "\n" + "\n")
 
 #Number of time steps 
@@ -109,7 +123,8 @@ def inside(point, ell_data):
 
 def setLoc(coord):
     "Determines the location of a point from the geographic coordinates (lon/lat) of this exercise"
-    NWvertex = [12.833333333386, -81.833333333333] #taken from the raster files, the most northwestern point (0,0)
+    NWlon, NWlat = round(metadata[2][1], 12), round((158*metadata[4][1] + metadata[3][1]), 12)
+    NWvertex = [NWlat, NWlon] #taken from the raster files, the most northwestern point (0,0)
     loc_val, loc = [], []
     if (coord[0] >= 0):
         loc_val.append(NWvertex[0] - coord[0]) #sets y above the Equator 
@@ -117,7 +132,7 @@ def setLoc(coord):
         loc_val.append(-coord[0] + NWvertex[0]) #sets y below the Equator
     loc_val.append(-NWvertex[1] + coord[1]) #sets x
     for i in range(2):
-        loc.append(int(loc_val[i] / 0.166666666667)) #divided by cell size
+        loc.append(int(loc_val[i] / metadata[4][1])) #divided by cell size
     return loc
 
 def setPop(in_list): 
@@ -277,10 +292,6 @@ df.to_csv("change_AC.csv", sep = ",", header = titles, index = False)
 
 out1.close() #close report file
 
-end = time.time()
-print("size: ", Nrow, " x ", Ncol, ", rep: ", rep, ", gen: ", steps, ", time: ", end - start, "\n")
-
-
 #Plots
 
 ################################################# 1) The fundamental niche ellipse
@@ -297,6 +308,7 @@ plt.xlim(150, 320)
 plt.ylabel("Precipitation")
 plt.ylim(1000, 4600)
 plt.scatter(Temp_list, Prec_list)
+plt.savefig("Fundamental_niche.png", dpi = 600, bbox_inches = "tight")
 plt.show()
 
 ##################################################### 2) Suitability space
@@ -305,6 +317,7 @@ plt.figure(1)
 plt.imshow(S, interpolation = "none", cmap = "plasma") 
 plt.title("S plotted on Geographical space (G)")
 plt.colorbar()
+plt.savefig("Suitability_space.png", dpi = 600, bbox_inches = "tight")
     
 #####################################################Plots for A: 3.1) Binarization
 
@@ -343,12 +356,13 @@ plt.figure(2)
 plt.imshow(Final_A, interpolation = "none") 
 plt.title("3.1) Summary of A")
 plt.colorbar()
+plt.savefig("A_summary.png", dpi = 600, bbox_inches = "tight")
 
 #######################################################Plots for A: 3.2) Comparison
 
 list_plotrep = np.random.choice(rep, 4, replace = False) #random list of replicates files
     #But it could be a list of 4 replicates that the user will choose, like: 
-list_plotrep = [0, 3, 7, 8] #remember that it starts with zero
+#list_plotrep = [0, 3, 7, 8] #remember that it starts with zero
 rep_subnames = [] #list of the chosen csv files names for subplots
 for r in range(4):
     list_plotrep[r] += 1
@@ -372,6 +386,7 @@ for r in range(4):
     plt.title("Rep_" + str(list_plotrep[r]))
     plt.colorbar() 
     plt.subplots_adjust(left = 0.1, bottom = 0.05, right = 0.9, top = 0.85, wspace = 0.7, hspace = 0.7)
+plt.savefig("A_comparison.png", dpi = 600, bbox_inches = "tight")
     
 ##################################################change in C and A through time
 
@@ -393,3 +408,9 @@ for r in range(len(list_plotrep)):
     plt.subplots_adjust(left = 0.1, bottom = 0.05, right = 0.9, top = 0.85, wspace = 0.7, hspace = 0.7)
     if (r == 2):
         leg = plt.legend(loc = "best", ncol = 1)
+plt.savefig("AvsC_change.png", dpi = 600, bbox_inches = "tight")
+
+###
+
+end = time.time()
+print("size: ", Nrow, " x ", Ncol, ", rep: ", rep, ", gen: ", steps, ", time: ", end - start, "\n")
