@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import QCoreApplication
 
 class Window(QMainWindow):
+    # define window general characteristics
     def __init__(self):
         super().__init__()
         
@@ -34,14 +35,17 @@ class Window(QMainWindow):
 
         self.InitWindow()
     
+    # window particular settings
     def InitWindow(self):
         
+        # menus
         mainMenu = self.menuBar()
         fileMenu = mainMenu.addMenu("File")
         editMenu = mainMenu.addMenu("Edit")
         viewMenu = mainMenu.addMenu("View")
         helpMenu = mainMenu.addMenu("Help")
         
+        # submenus
         newAction = QAction("New", self)
         newAction.setShortcut("Ctrl+N")
         newAction.setStatusTip("New project")
@@ -84,6 +88,7 @@ class Window(QMainWindow):
         citationAction.setStatusTip("Cite this software")
         citationAction.triggered.connect(self.Citation)
         
+        # conecting submenus to menus
         fileMenu.addAction(newAction)
         fileMenu.addAction(saveAction)
         fileMenu.addAction(exitAction)
@@ -210,25 +215,31 @@ class Window(QMainWindow):
         bRun.setToolTip("Run application")
         #bRun.clicked.connect(self.)
         
+        # status bar
         self.statusbar = self.statusBar()
         self.statusbar.showMessage("Status bar...")
 
+        # setting the window
         self.setWindowTitle(self.title)
         self.setGeometry(self.top, self.left, self.width, self.height)
         self.show()
-        
+    
+    # funtionalities conected to buttons    
+    ## close
     def Close(self):
         reply = QMessageBox.question(self, "Exit message", "Close application?",
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.close()
-            
+    
+    ## status bar        
     def toggleMenu(self, state):
         if state:
             self.statusbar.show()
         else:
             self.statusbar.hide()
-            
+    
+    ## context menu (right clic)        
     def contextMenuEvent(self, event):
         contextMenu = QMenu(self)
         
@@ -241,14 +252,14 @@ class Window(QMainWindow):
         if action == quitAction:
             self.close()
     
+    ## citation
     def Citation(self):
         citation = """Authors. 2018. M simulation: A sofware for constructing hypotheses 
 of M areas for ecological niche modeling. Journal v:p-p."""
         QMessageBox.information(self, "Citation", citation,
                              QMessageBox.Ok, QMessageBox.Ok)
 
-        
-                    
+# runing the application                    
 App = QApplication(sys.argv)
 window = Window()
 sys.exit(App.exec())
