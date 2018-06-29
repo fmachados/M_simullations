@@ -14,26 +14,19 @@ os.chdir("C:\\Users\\Fernando Machado\\Documents\\Python\\M_simullations")
 import matplotlib.pyplot as plt
 from random import choice
 import numpy as np
+import numpy
 import pandas as pd
 import time
 import csv
 from scipy.stats import chi2
 import matplotlib.patches as mpatches
 import linecache
+import scipy
 
 start = time.time() #measuring performance
 
 #Outputs
 out1 = open("Report.txt","w")
-
-#csv inputs
-#with open("clip_bio1_10m.csv", "r") as f: #csv for Temperature data in Northern South America (WorldClim)
-#    reader = csv.reader(f)
-#    Temp_M = list(reader)
-
-#with open("clip_bio12_10m.csv", "r") as f: #csv for Precipitation data in Northern South America (WorldClim)
-#    reader = csv.reader(f)
-#    Prec_M = list(reader)
 
 #Size of matrices (ascii)
 metadata = []
@@ -71,8 +64,13 @@ for row in range(len(HLdata)):
         Temp_list.append(int(HLdata[row][2]))
         Prec_list.append(int(HLdata[row][3]))
 
+#Nf centroid        ###Fix both for multiple dimensions, just add a loop
+centroid = [np.mean(Temp_list), np.mean(Prec_list)]
+#var-covar
+VC_matrix = np.cov(Temp_list, Prec_list)
+
 #Number of replicates
-rep = 4#10
+rep = 4 #10
 out1.write("Replicates: " + str(rep) + "\n" + "\n")
 
 #Number of time steps 
@@ -96,30 +94,30 @@ titles = []*2*rep
 
 # __Functions__
 
-def ConfEllipse(x_list, y_list, alfa):
-    "Generates the arguments for building a confidence ellipse"
-    xmean, ymean = np.mean(x_list), np.mean(y_list) #centroid
-    s = chi2.isf(alfa, 2) #chi square constant
-    VC_matrix = np.cov(x_list, y_list) #var-covar matrix
-    lambda_, v = np.linalg.eig(VC_matrix) #eigenvalues & eigenvectors
-    xd = 2 * np.sqrt(s * lambda_[0]) #axis 1
-    yd = 2 * np.sqrt(s * lambda_[1]) #axis 2
-    angle = np.rad2deg(np.arccos(v[0, 0]))
-    return xmean, ymean, xd, yd, angle
+#def ConfEllipse(x_list, y_list, alfa):
+#    "Generates the arguments for building a confidence ellipse"
+#    xmean, ymean = np.mean(x_list), np.mean(y_list) #centroid
+#    s = chi2.isf(alfa, 2) #chi square constant
+#    VC_matrix = np.cov(x_list, y_list) #var-covar matrix
+#    lambda_, v = np.linalg.eig(VC_matrix) #eigenvalues & eigenvectors
+#    xd = 2 * np.sqrt(s * lambda_[0]) #axis 1
+#    yd = 2 * np.sqrt(s * lambda_[1]) #axis 2
+#    angle = np.rad2deg(np.arccos(v[0, 0]))
+#    return xmean, ymean, xd, yd, angle
 
-def inside(point, ell_data):
-    "Determines if a point is inside a confidence ellipse"
-    inside = [0, 0]
-    cos_angle = np.cos(np.radians(180 - ell_data[4]))
-    sin_angle = np.sin(np.radians(180 - ell_data[4]))
-    x_trans = (point[0] - ell_data[0]) * cos_angle - (point[1] - ell_data[1]) * sin_angle
-    y_trans = (point[0] - ell_data[0]) * sin_angle + (point[1] - ell_data[1]) * cos_angle
-    norm_d = (x_trans / (ell_data[2]/2))**2 + (y_trans / (ell_data[3]/2))**2 #normalized distance to the centroid
-    if (norm_d <= 1):
-        inside = [1, norm_d]
-    else:
-        inside = [0, norm_d]
-    return inside
+#def inside(point, ell_data):
+#    "Determines if a point is inside a confidence ellipse"
+#    inside = [0, 0]
+#    cos_angle = np.cos(np.radians(180 - ell_data[4]))
+#    sin_angle = np.sin(np.radians(180 - ell_data[4]))
+#    x_trans = (point[0] - ell_data[0]) * cos_angle - (point[1] - ell_data[1]) * sin_angle
+#    y_trans = (point[0] - ell_data[0]) * sin_angle + (point[1] - ell_data[1]) * cos_angle
+#    norm_d = (x_trans / (ell_data[2]/2))**2 + (y_trans / (ell_data[3]/2))**2 #normalized distance to the centroid
+#    if (norm_d <= 1):
+#        inside = [1, norm_d]
+#    else:
+#        inside = [0, norm_d]
+#    return inside
 
 def setLoc(coord):
     "Determines the location of a point from the geographic coordinates (lon/lat) of this exercise"
@@ -164,10 +162,10 @@ def updateC(C, A_now):
                     C[row][col] = C[row][col] + A_now[row][col]
     return C
 
-def direction():
-    "Sets the direction of dispersal for latitude and longitude"
-    direction = [choice([-1,1]) for i in range(2)]
-    return direction
+#def direction():
+#    "Sets the direction of dispersal for latitude and longitude"
+#    direction = [choice([-1,1]) for i in range(2)]
+#    return direction
 
 def howmany(M):
     "Counts the number of cells that are occupied in any matrix M"
@@ -193,30 +191,54 @@ def maxM4(M4):
 
 # __main__
 
-Nf_ellipse = ConfEllipse(Temp_list, Prec_list, 0.05) #fundamental niche ellipse
+#Nf_ellipse = ConfEllipse(Temp_list, Prec_list, 0.05) #fundamental niche ellipse
 
-norm_d = [0 for i in range(len(Temp_data))] #list for normalized distances of environmental pixel to the centroid
+#norm_d = [0 for i in range(len(Temp_data))] #list for normalized distances of environmental pixel to the centroid
+#for i in range(len(Temp_data)):
+#    norm_dist = inside([Temp_data[i], Prec_data[i]], Nf_ellipse)
+#    norm_d[i] = norm_dist[1]
+
+#Mahalanobis distances list
+Mah_d = [0 for i in range(len(Temp_data))]
 for i in range(len(Temp_data)):
-    norm_dist = inside([Temp_data[i], Prec_data[i]], Nf_ellipse)
-    norm_d[i] = norm_dist[1]
+    Mah_d[i] = scipy.spatial.distance.mahalanobis([Temp_data[i], Prec_data[i]], 
+         centroid, numpy.linalg.inv(VC_matrix))
 
 #the suitability can be proportional to the normalized distance to the centroid of the fundamental niche
-S_data = [0 for i in range(len(Temp_data))]
-for i in range(len(Temp_data)): 
-    S_data[i] = 1 - norm_d[i]
-    if (S_data[i] < 0): #i.e., norm_d > 1 (outside the ellipse)
-        S_data[i] = 0
+#S_data = [0 for i in range(len(Temp_data))]
+#for i in range(len(Temp_data)): 
+#    S_data[i] = 1 - norm_d[i]
+#    if (S_data[i] < 0): #i.e., norm_d > 1 (outside the ellipse)
+#        S_data[i] = 0
 
-#A matrix of suitability values is created
+#the suitability can be proportional to the standarized Mahalanobis distance (to the centroid of the fundamental niche)
+S_data = [0 for i in range(len(Temp_data))]
+s = chi2.isf(0.05, len(centroid)) #95% confidence
+for i in range(len(Temp_data)): 
+    if (Mah_d[i] > s): #outside the ellipsoid (S=0)
+        S_data[i] = 0
+    else: #suitability values inside the ellipsoid
+        S_data[i] = 1 - (Mah_d[i] / s)
+
+#The matrix of suitability values is created
 S = [[0]*Ncol for i in range(Nrow)] 
 S =  [S_data[Ncol * i : Ncol * (i + 1)] for i in range(Nrow)]
+
+
+#in_list = []
+#for i in range(1, len(HLdata)):
+#    subset = inside([int(HLdata[i][2]), int(HLdata[i][3])], Nf_ellipse)
+#    if (subset[0] == 1):
+#        in_list.append([HLdata[i][0], HLdata[i][1], HLdata[i][3], HLdata[i][3], subset[1]])
 
 #which samples are inside the Nf_ellipse? This is used to select the points for the replicates
 in_list = []
 for i in range(1, len(HLdata)):
-    subset = inside([int(HLdata[i][2]), int(HLdata[i][3])], Nf_ellipse)
-    if (subset[0] == 1):
-        in_list.append([HLdata[i][0], HLdata[i][1], HLdata[i][3], HLdata[i][3], subset[1]])
+    subset = scipy.spatial.distance.mahalanobis([int(HLdata[1][2]), int(HLdata[1][3])], 
+                                                 centroid, numpy.linalg.inv(VC_matrix))
+    if (subset <= s):
+        in_list.append([float(HLdata[i][0]), float(HLdata[i][1]), int(HLdata[i][3]),
+                        int(HLdata[i][3]), subset])
 
 ###the simulation starts
 
@@ -247,18 +269,22 @@ for r in range(rep):
                         Nd = NdMax 
                     to_where = [[0]*2 for i in range(Nd)] #each disperser's movement direction is set randomly
                     for i in range(Nd):                
-                        to_where[i] = direction()
+#                        to_where[i] = direction()
                         #The number of pixels (distance) in latitude and longitude that the disperser will move away from its population are set
                         lat_outside = True
                         while lat_outside:
-                            ###The distance is taken from a Poisson distribution with lambda = 1
-                            d_lat = np.random.poisson(lam = 1)*to_where[i][0]
+                            #The distance is taken from a Poisson distribution with lambda = 1
+#                            d_lat = np.random.poisson(lam = 1)*to_where[i][0]
+                            
+                            #The distance is taken from a Normal distribution with mean = 0 & SD = 2
+                            d_lat = int(np.random.normal(loc = 0, scale = 2))
                             if (0 <= row + d_lat < Nrow): #if is inside the G grid
                                 row_now = row + d_lat
                                 lat_outside = False
                         lon_outside = True
                         while lon_outside:
-                            d_lon = np.random.poisson(lam = 1)*to_where[i][1]
+#                            d_lon = np.random.poisson(lam = 1)*to_where[i][1]
+                            d_lon = int(np.random.normal(loc = 0, scale = 2))
                             if (0 <= col + d_lon < Ncol):
                                 col_now = col + d_lon
                                 lon_outside = False
@@ -296,11 +322,15 @@ out1.close() #close report file
 
 ################################################# 1) The fundamental niche ellipse
 
+lambda_, v = np.linalg.eig(VC_matrix) #eigenvalues & eigenvectos
 plt.figure(0)
 ax = plt.gca()
-ellipse = mpatches.Ellipse(xy = (Nf_ellipse[0], Nf_ellipse[1]), width = Nf_ellipse[2], height = Nf_ellipse[3],
-                           angle = Nf_ellipse[4], edgecolor = "r",
-                           fc= "None", lw = 1) 
+#ellipse = mpatches.Ellipse(xy = (Nf_ellipse[0], Nf_ellipse[1]), width = Nf_ellipse[2], height = Nf_ellipse[3],
+#                           angle = Nf_ellipse[4], edgecolor = "r",
+#                           fc= "None", lw = 1)
+ellipse = mpatches.Ellipse(xy = centroid, width = 2 * np.sqrt(s * lambda_[0]), 
+                           height = 2 * np.sqrt(s * lambda_[1]), angle = np.rad2deg(np.arccos(v[0, 0])), #
+                           edgecolor = "r", fc= "None", lw = 1) 
 ax.add_patch(ellipse)
 plt.title("Fundamental Niche 95% ellipse")
 plt.xlabel("Temperature (x10)")
