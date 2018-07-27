@@ -11,8 +11,8 @@ os.getcwd() #current working directory
 #os.chdir("C:\\Users\\Fernando Machado\\Desktop\\Taigo\\Academia\\KU\\Courses\\Simulation & Modeling in Bio (Pyhton)\\ip") #new working directory
 os.chdir("C:\\Users\\Fernando Machado\\Documents\\Python\\M_simullations")
 
+import glob
 import matplotlib.pyplot as plt
-from random import choice
 import numpy as np
 import numpy
 import pandas as pd
@@ -28,16 +28,44 @@ start = time.time() #measuring performance
 #Outputs
 out1 = open("Report.txt","w")
 
+#Find the ascii files in the working directory
+list_vars = glob.glob("*.asc")
+
+#Metadata for the ascii files
+Meta = [] 
+for i in range(len(list_vars)):
+    metadata = [] 
+    for j in range(6): #the first six lines of each ascii file
+        metadata.append(linecache.getline(list_vars[i], j+1)) #each line is appended inside the metadata matrix
+        metadata[j] = metadata[j].split() #changes from string to list
+        metadata[j][1] = float(metadata[j][1]) #changes the values to string elements to floats
+        Meta.append(metadata[j][1]) #Meta has all the metadata lists from all the ascii files
+
+MetaM =  [Meta[6 * i : 6 * (i + 1)] for i in range(len(list_vars))] #Meta is turned into a Matrix
+
+#Let's check that the metadata among the ascii files is the same
+MetaT = np.matrix.transpose(np.array(MetaM)) #transpose of MetaM
+
+for i in range(len(list_vars)):
+    if(len(set(MetaT[i])) != 1): #sets can have only unique elements
+        print("Raster layers have different metadata") #add something to Stop code Here!
+    else:
+        MetaVal = MetaM.pop(0) #Erase all equivalent rows but one
+        MetaNames = [] #make a list of the names
+        for i in range(6):
+            MetaNames.append(metadata[i][0])
+        Meta = [MetaNames, MetaVal] #Metadata object! It needs to be stored
+        
 #Size of matrices (ascii)
-metadata = []
-for i in range(6): #the first six lines of the ascii file
-    metadata.append(linecache.getline("clip_bio1_10m.asc", i+1)) #each line is appended inside the metadata matrix
-    metadata[i] = metadata[i].split() #changes from string to list
-    metadata[i][1] = float(metadata[i][1]) #changes the values to string elements to floats
+#metadata = []
+#for i in range(6): #the first six lines of the ascii file
+#    metadata.append(linecache.getline("clip_bio1_10m.asc", i+1)) #each line is appended inside the metadata matrix
+#    metadata[i] = metadata[i].split() #changes from string to list
+#    metadata[i][1] = float(metadata[i][1]) #changes the values to string elements to floats
 
 #size of environmental matrices
-Nrow = int(metadata[1][1])
-Ncol = int(metadata[0][1])
+Nrow = int(Meta[1][1])
+Ncol = int(Meta[1][0])
 out1.write("Size of grid: " + str(Nrow) + " by " + str(Ncol) + "\n" + "\n")
 
 #The variables
@@ -57,6 +85,9 @@ with open("Nf_Hleucosticta.csv", "r") as f: #has a header
     reader = csv.reader(f)
     HLdata = list(reader) #with these points the fundamental niche ellipse is estimated, see main code below
 
+#This needs to be fix, the user should give just a csv for the spp with lat/lon, and the code should extract
+#the values from the rasters 
+    
 Temp_list, Prec_list = [], []
 Prec_list = []
 for row in range(len(HLdata)):
@@ -219,6 +250,8 @@ for i in range(len(Temp_data)):
         S_data[i] = 0
     else: #suitability values inside the ellipsoid
         S_data[i] = 1 - (Mah_d[i] / s)
+
+### Be careful here with NA values!
 
 #The matrix of suitability values is created
 S = [[0]*Ncol for i in range(Nrow)] 
