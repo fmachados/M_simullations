@@ -6,20 +6,10 @@ Created on Fri Jun  1 11:14:32 2018
 """
 
 import sys
+import webbrowser
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtWidgets import QToolTip
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QStatusBar
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QMenu
-from PyQt5.QtWidgets import QMenuBar
-from PyQt5.QtWidgets import QLineEdit
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QCoreApplication, QUrl
 
 class Window(QMainWindow):
     # define window general characteristics
@@ -78,7 +68,7 @@ class Window(QMainWindow):
         
         tutorialAction = QAction("Tutorial", self)
         tutorialAction.setStatusTip("Detailed tutorial")
-        #tutorialAction.triggered.connect(editMenu.paste)
+        tutorialAction.triggered.connect(self.open_webbrowser)
         
         aboutAction = QAction("About", self)
         aboutAction.setStatusTip("About this software")
@@ -252,6 +242,10 @@ class Window(QMainWindow):
         if action == quitAction:
             self.close()
     
+    ## tutorial
+    def open_webbrowser(self):
+        url = QUrl("https://github.com/fmachados/M_simullations")
+
     ## citation
     def Citation(self):
         citation = """Authors. 2018. M simulation: A sofware for constructing hypotheses 
