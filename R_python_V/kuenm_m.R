@@ -71,7 +71,7 @@ kuenm_m <- function(occ, vars.folder, disp.function = "normal", function.spread 
     m_variables <- raster::mask(variables, m)
     m_variables <- raster::crop(m_variables, m)
     
-    var_names <- paste(var_names, ".asc", sep = "")
+    var_names <- paste(paste(out.varmasked, var_names, sep = "/"), ".asc", sep = "")
     
     dir.create(out.varmasked)
     
