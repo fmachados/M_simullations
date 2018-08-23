@@ -26,8 +26,7 @@
 #' occurrences on an environmental layer map will return to the plot window. If \code{mask.vars} = TRUE,
 #' the environmental variables will be masked to the M and written in the \code{out.varmasked} folder.
 #'
-#' @details If any of the potential sources of variation is equal to one (e.g., only one parameter, or 
-#' only one climate model), this source of variation will not be considered.
+#' @details 
 
 # project = FALSE, steps = 100, for future
 
@@ -41,13 +40,21 @@ kuenm_m <- function(occ, vars.folder, disp.function = "normal", function.spread 
     install.packages("reticulate")
   }
   
-  # testing for initial requirements
+  # testing for initial requirements and setting R up
   
   reticulate::py_available() # cuando veas algo asi name::name es para usar una funcion de un paquete sin llamarlo
   
-  
   use_python("C:/Users/Marlon/AppData/Local/Programs/Python/Python36")
   
+  # preparing data for analyses
+  ## variables
+  var <- list.files(vars.folder, pattern = ".asc$", full.names = TRUE)
+  variables <- raster::stack(var)
+  var_names <- names(variables)
+  
+  ## records
+  occ <- read.csv(occ)
+
   # python simulation
   reticulate::repl_python()
   
@@ -55,7 +62,24 @@ kuenm_m <- function(occ, vars.folder, disp.function = "normal", function.spread 
   
   exit
   
-  # preparing and writing outputs
+  # preparing, writing, and outputs
+  ## 
   
+  ## writing M variables if asked
+  if (mask.vars == TRUE) {
+    cat("Masking variables to M and writing them in", out.varmasked, "    Please wait...")
+    m_variables <- raster::mask(variables, m)
+    m_variables <- raster::crop(m_variables, m)
+    
+    var_names <- paste(var_names, ".asc", sep = "")
+    
+    dir.create(out.varmasked)
+    
+    for (i in 1:length(raster::unstack(m_variables))) {
+      raster::writeRaster(m_variables[[i]], filename = var_names[i], format = "ascii")
+    }
+  }
+  
+  ## plot
   
 }
